@@ -22,9 +22,7 @@ export default function Home() {
   const [role, setRole] = useState<RegisterBodyRole>("user");
 
   const onAuthSuccess = (data: any) => {
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-    }
+    localStorage.setItem("carcare_user", JSON.stringify(data.user));
     toast({ title: "התחברת בהצלחה" });
     if (data.user.role === "garage_owner") {
       setLocation("/garage-dashboard");

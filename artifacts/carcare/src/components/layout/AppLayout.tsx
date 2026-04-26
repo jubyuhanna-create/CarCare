@@ -9,7 +9,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useGetSession();
   const logout = useLogout();
 
-  const isGarageOwner = session?.user?.role === "garage_owner";
+  const storedUser = (() => {
+    try { return JSON.parse(localStorage.getItem("carcare_user") || "null"); } catch { return null; }
+  })();
+  const isGarageOwner = (session?.user?.role ?? storedUser?.role) === "garage_owner";
 
   const userLinks = [
     { href: "/dashboard", label: "ראשי", icon: Home },
@@ -27,7 +30,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const handleLogout = () => {
     logout.mutate(undefined, {
       onSuccess: () => {
-        localStorage.removeItem("token");
+        localStorage.removeItem("carcare_user");
         window.location.href = "/";
       }
     });

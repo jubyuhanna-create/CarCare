@@ -19,17 +19,16 @@ import AppLayout from "@/components/layout/AppLayout";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ component: Component, role }: { component: any, role?: "user" | "garage_owner" }) {
-  // Simplistic auth check for MVP
-  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("carcare_user");
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (!token) {
+    if (!user) {
       setLocation("/");
     }
-  }, [token, setLocation]);
+  }, [user, setLocation]);
 
-  if (!token) return null;
+  if (!user) return null;
 
   return (
     <AppLayout>
