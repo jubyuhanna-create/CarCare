@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
@@ -6,17 +5,14 @@ import { logger } from "./logger";
 import { createClient } from '@supabase/supabase-js';
 
 const SESSION_KEY = "carcare_session";
+
+// إعداد Supabase Client
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_ANON_KEY!;
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
-}
-
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
-}
+// ملاحظة: ما عدنا نحتاج hashPassword و verifyPassword لأن سوبا بيس بتتكفل فيهم
+// بس رح نخليهم كـ Empty functions إذا الكود بطلبهم في مكان تاني عشان ما يعطي Error
 
 export function setSession(res: Response, userId: number, role: string): void {
   const sessionData = Buffer.from(JSON.stringify({ userId, role, ts: Date.now() })).toString("base64");
@@ -51,12 +47,13 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     return;
   }
   try {
+    // إحضار بيانات المستخدم من داتابيز سوبا بيس (PostgreSQL) باستخدام Drizzle
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, session.userId));
     if (!user) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
-    (req as Request & { user: typeof user }).user = user;
+    (req as any).user = user;
     next();
   } catch (err) {
     logger.error({ err }, "Auth middleware error");
