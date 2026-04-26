@@ -3,8 +3,12 @@ import { Request, Response, NextFunction } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "./logger";
+import { createClient } from '@supabase/supabase-js';
 
 const SESSION_KEY = "carcare_session";
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
