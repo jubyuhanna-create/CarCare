@@ -1,0 +1,77 @@
+You are a senior full-stack engineer, product designer, and UX expert. Build a production-ready web application for Israel market. ⚠️ IMPORTANT:
+
+The entire UI must be in Hebrew (RTL)
+Clean, minimal, premium design (like banking or modern car apps)
+Short, natural Hebrew text (NOT robotic, NOT AI-like)
+Focus on simplicity and clarity 🚗 APP IDEA This is a car management platform: Users:
+Sign up / login (Email + Google)
+Add a car using license plate
+System fetches car data automatically
+User selects estimated yearly mileage:Options + manual input
+System generates maintenance guidance:What to fix
+When to fix
+Simple DIY fixes
+User sees:Upcoming maintenance
+Car health status
+User can:Book a nearby garage
+Choose time
+Confirm booking
+Garage gets:Dashboard
+Incoming bookings
+Car details
+After service:Add record
+Upload receipt image
+System builds:
+Full maintenance history
+User can export:
+Clean PDF report (for selling the car) 🎯 UX REQUIREMENTS (VERY IMPORTANT)
+Hebrew RTL layout
+Very clean UI
+Large spacing (whitespace)
+Minimal colors (2-3 max)
+Simple icons
+NO long paragraphs
+NO AI-style explanations Example tone: BAD: "בהתאם לנתונים שסיפקת..." GOOD: "הגיע הזמן לטיפול" 🧠 MILEAGE STEP (CRITICAL) After adding car, show: "כמה אתה נוסע בשנה?" Options:
+פחות מ-10,000 ק״מ
+10,000–15,000 ק״מ
+15,000–20,000 ק״מ
+יותר מ-20,000 ק״מ
+Input: "הכנס מספר מדויק (אופציונלי)" 🧩 FEATURES
+Auth (Supabase)
+Add car (license plate API)
+Dashboard:מצב הרכב
+תחזוקה קרובה
+היסטוריית טיפולים
+Maintenance system (rules-based first, AI optional)
+Garage marketplace:Nearby garages
+Booking system
+Garage dashboard:View bookings
+Accept/reject
+Service records:Description
+Cost
+Mileage
+Receipt upload
+PDF export:Clean, minimal report 🎨 DESIGN SYSTEM
+Font: clean Hebrew font
+Colors: neutral + one accent
+Cards UI
+Soft shadows
+Mobile-first 🔐 SECURITY
+Supabase Auth
+RLS (user only sees own data)
+Secure file upload (images only)
+Input validation 💰 BUSINESS MODEL
+Commission per booking (primary)
+Optional garage subscription (boost visibility)
+Optional premium user features later OUTPUT REQUIRED:
+Full project structure
+UI screens (Hebrew text included)
+Database schema
+RLS policies
+Auth setup
+Booking flow
+Garage dashboard
+PDF example layout
+Clean, production-level code examples Focus on clarity, simplicity, and premium feel.
+https://lptezlrienrkmfdesfff.supabase.co
+sb_publishable_b9MB5PsIcBYw6fetQerMQw_e_itT0Td

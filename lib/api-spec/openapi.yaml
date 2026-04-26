@@ -1,22 +1,35 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CarCare IL - Car management platform
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: cars
+    description: Car management
+  - name: maintenance
+    description: Maintenance tasks
+  - name: garages
+    description: Garage marketplace
+  - name: bookings
+    description: Booking system
+  - name: serviceRecords
+    description: Service records
+  - name: dashboard
+    description: Dashboard summaries
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +37,538 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/session:
+    get:
+      operationId: getSession
+      tags: [auth]
+      summary: Get current user session
+      responses:
+        "200":
+          description: Session info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /cars:
+    get:
+      operationId: listCars
+      tags: [cars]
+      summary: List user's cars
+      responses:
+        "200":
+          description: List of cars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Car"
+    post:
+      operationId: createCar
+      tags: [cars]
+      summary: Add a new car
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCarBody"
+      responses:
+        "201":
+          description: Car created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /cars/{id}:
+    get:
+      operationId: getCar
+      tags: [cars]
+      summary: Get car details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Car details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateCar
+      tags: [cars]
+      summary: Update car
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCarBody"
+      responses:
+        "200":
+          description: Car updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+    delete:
+      operationId: deleteCar
+      tags: [cars]
+      summary: Delete car
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /cars/lookup/{plate}:
+    get:
+      operationId: lookupCarByPlate
+      tags: [cars]
+      summary: Lookup car details by license plate
+      parameters:
+        - name: plate
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Car info from registry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarLookupResult"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /cars/{carId}/maintenance:
+    get:
+      operationId: listMaintenanceTasks
+      tags: [maintenance]
+      summary: List maintenance tasks for a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Maintenance tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MaintenanceTask"
+
+  /cars/{carId}/health:
+    get:
+      operationId: getCarHealth
+      tags: [maintenance]
+      summary: Get car health summary
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Car health
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarHealth"
+
+  /garages:
+    get:
+      operationId: listGarages
+      tags: [garages]
+      summary: List nearby garages
+      parameters:
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: specialization
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of garages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Garage"
+    post:
+      operationId: createGarage
+      tags: [garages]
+      summary: Register a garage (garage owner)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGarageBody"
+      responses:
+        "201":
+          description: Garage created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Garage"
+
+  /garages/{id}:
+    get:
+      operationId: getGarage
+      tags: [garages]
+      summary: Get garage details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Garage details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Garage"
+
+  /garages/my:
+    get:
+      operationId: getMyGarage
+      tags: [garages]
+      summary: Get current user's garage
+      responses:
+        "200":
+          description: User's garage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Garage"
+        "404":
+          description: No garage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bookings:
+    get:
+      operationId: listBookings
+      tags: [bookings]
+      summary: List bookings (user or garage owner)
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [user, garage]
+      responses:
+        "200":
+          description: Bookings list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+    post:
+      operationId: createBooking
+      tags: [bookings]
+      summary: Create a booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookingBody"
+      responses:
+        "201":
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bookings/{id}:
+    get:
+      operationId: getBooking
+      tags: [bookings]
+      summary: Get booking details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Booking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+    patch:
+      operationId: updateBooking
+      tags: [bookings]
+      summary: Update booking status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBookingBody"
+      responses:
+        "200":
+          description: Booking updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+
+  /service-records:
+    get:
+      operationId: listServiceRecords
+      tags: [serviceRecords]
+      summary: List service records for a car
+      parameters:
+        - name: carId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Service records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServiceRecord"
+    post:
+      operationId: createServiceRecord
+      tags: [serviceRecords]
+      summary: Add service record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateServiceRecordBody"
+      responses:
+        "201":
+          description: Service record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceRecord"
+
+  /service-records/{id}:
+    get:
+      operationId: getServiceRecord
+      tags: [serviceRecords]
+      summary: Get service record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Service record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceRecord"
+    patch:
+      operationId: updateServiceRecord
+      tags: [serviceRecords]
+      summary: Update service record (add receipt)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateServiceRecordBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceRecord"
+
+  /service-records/{id}/upload-receipt:
+    post:
+      operationId: uploadReceipt
+      tags: [serviceRecords]
+      summary: Upload receipt image URL for service record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadReceiptBody"
+      responses:
+        "200":
+          description: Receipt uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceRecord"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary for current user
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/garage-summary:
+    get:
+      operationId: getGarageDashboardSummary
+      tags: [dashboard]
+      summary: Get garage owner dashboard summary
+      responses:
+        "200":
+          description: Garage summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GarageDashboardSummary"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +579,501 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    SessionResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        isAuthenticated:
+          type: boolean
+      required:
+        - isAuthenticated
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [user, garage_owner, admin]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - role
+        - createdAt
+
+    RegisterBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        name:
+          type: string
+        role:
+          type: string
+          enum: [user, garage_owner]
+      required:
+        - email
+        - password
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+
+    Car:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        licensePlate:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        color:
+          type: ["string", "null"]
+        engineType:
+          type: ["string", "null"]
+        currentMileage:
+          type: ["integer", "null"]
+        yearlyMileage:
+          type: ["integer", "null"]
+        healthScore:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - licensePlate
+        - make
+        - model
+        - year
+        - createdAt
+
+    CreateCarBody:
+      type: object
+      properties:
+        licensePlate:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        color:
+          type: string
+        engineType:
+          type: string
+        currentMileage:
+          type: integer
+        yearlyMileage:
+          type: integer
+      required:
+        - licensePlate
+        - make
+        - model
+        - year
+
+    UpdateCarBody:
+      type: object
+      properties:
+        currentMileage:
+          type: integer
+        yearlyMileage:
+          type: integer
+        color:
+          type: string
+        engineType:
+          type: string
+
+    CarLookupResult:
+      type: object
+      properties:
+        licensePlate:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        color:
+          type: ["string", "null"]
+        engineType:
+          type: ["string", "null"]
+      required:
+        - licensePlate
+        - make
+        - model
+        - year
+
+    MaintenanceTask:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        urgency:
+          type: string
+          enum: [critical, soon, routine]
+        dueInKm:
+          type: ["integer", "null"]
+        dueDate:
+          type: ["string", "null"]
+          format: date-time
+        isDiy:
+          type: boolean
+        isCompleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - carId
+        - title
+        - description
+        - urgency
+        - isDiy
+        - isCompleted
+        - createdAt
+
+    CarHealth:
+      type: object
+      properties:
+        carId:
+          type: integer
+        score:
+          type: integer
+        status:
+          type: string
+          enum: [excellent, good, fair, poor]
+        criticalCount:
+          type: integer
+        soonCount:
+          type: integer
+        routineCount:
+          type: integer
+        nextServiceKm:
+          type: ["integer", "null"]
+      required:
+        - carId
+        - score
+        - status
+        - criticalCount
+        - soonCount
+        - routineCount
+
+    Garage:
+      type: object
+      properties:
+        id:
+          type: integer
+        ownerId:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        phone:
+          type: string
+        description:
+          type: ["string", "null"]
+        specializations:
+          type: array
+          items:
+            type: string
+        rating:
+          type: ["number", "null"]
+        reviewCount:
+          type: integer
+        isVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - ownerId
+        - name
+        - address
+        - city
+        - phone
+        - reviewCount
+        - isVerified
+        - createdAt
+
+    CreateGarageBody:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        phone:
+          type: string
+        description:
+          type: string
+        specializations:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - address
+        - city
+        - phone
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        garageId:
+          type: integer
+        carId:
+          type: integer
+        scheduledDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, confirmed, rejected, completed, cancelled]
+        notes:
+          type: ["string", "null"]
+        maintenanceTaskId:
+          type: ["integer", "null"]
+        garageName:
+          type: ["string", "null"]
+        carInfo:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - garageId
+        - carId
+        - scheduledDate
+        - status
+        - createdAt
+
+    CreateBookingBody:
+      type: object
+      properties:
+        garageId:
+          type: integer
+        carId:
+          type: integer
+        scheduledDate:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        maintenanceTaskId:
+          type: integer
+      required:
+        - garageId
+        - carId
+        - scheduledDate
+
+    UpdateBookingBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [confirmed, rejected, completed, cancelled]
+        notes:
+          type: string
+
+    ServiceRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        garageId:
+          type: ["integer", "null"]
+        bookingId:
+          type: ["integer", "null"]
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        cost:
+          type: ["number", "null"]
+        mileageAtService:
+          type: ["integer", "null"]
+        receiptUrl:
+          type: ["string", "null"]
+        serviceDate:
+          type: string
+          format: date-time
+        garageName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - carId
+        - title
+        - serviceDate
+        - createdAt
+
+    CreateServiceRecordBody:
+      type: object
+      properties:
+        carId:
+          type: integer
+        garageId:
+          type: integer
+        bookingId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        cost:
+          type: number
+        mileageAtService:
+          type: integer
+        serviceDate:
+          type: string
+          format: date-time
+      required:
+        - carId
+        - title
+        - serviceDate
+
+    UpdateServiceRecordBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        cost:
+          type: number
+        mileageAtService:
+          type: integer
+        receiptUrl:
+          type: string
+
+    UploadReceiptBody:
+      type: object
+      properties:
+        receiptUrl:
+          type: string
+      required:
+        - receiptUrl
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalCars:
+          type: integer
+        pendingMaintenance:
+          type: integer
+        upcomingBookings:
+          type: integer
+        recentServices:
+          type: integer
+        cars:
+          type: array
+          items:
+            $ref: "#/components/schemas/Car"
+        upcomingBookingsList:
+          type: array
+          items:
+            $ref: "#/components/schemas/Booking"
+      required:
+        - totalCars
+        - pendingMaintenance
+        - upcomingBookings
+        - recentServices
+        - cars
+        - upcomingBookingsList
+
+    GarageDashboardSummary:
+      type: object
+      properties:
+        totalBookings:
+          type: integer
+        pendingBookings:
+          type: integer
+        confirmedBookings:
+          type: integer
+        completedBookings:
+          type: integer
+        todayBookings:
+          type: integer
+        recentBookings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Booking"
+      required:
+        - totalBookings
+        - pendingBookings
+        - confirmedBookings
+        - completedBookings
+        - todayBookings
+        - recentBookings
